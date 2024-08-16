@@ -45,11 +45,7 @@ public final class Deencapsulation {
 			MethodHandle export = lookup(Module.class).findVirtual(Module.class, "implAddOpens", MethodType.methodType(void.class, String.class));
 			for (Module module : modules) {
 				for (String name : module.getPackages()) {
-					try {
-						export.invokeExact(module, name);
-					} catch (Exception ex) {
-						throw new AssertionError(ex);
-					}
+					export.invokeExact(module, name);
 				}
 			}
 		} catch (Throwable t) {
