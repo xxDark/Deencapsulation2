@@ -2,9 +2,13 @@ package dev.xdark.deencapsulation;
 
 import sun.reflect.ReflectionFactory;
 
+import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.HashSet;
+import java.util.Set;
 
 public final class Deencapsulation {
 
@@ -24,6 +28,32 @@ public final class Deencapsulation {
 				t = e;
 			}
 			throw new IllegalStateException(t);
+		}
+	}
+
+	public static void deencapsulate(Class<?> caller) {
+		Set<Module> modules = new HashSet<>();
+		Module base = caller.getModule();
+		ModuleLayer baseLayer = base.getLayer();
+		if (baseLayer != null)
+			modules.addAll(baseLayer.modules());
+		modules.addAll(ModuleLayer.boot().modules());
+		for (ClassLoader cl = caller.getClassLoader(); cl != null; cl = cl.getParent()) {
+			modules.add(cl.getUnnamedModule());
+		}
+		try {
+			MethodHandle export = lookup(Module.class).findVirtual(Module.class, "implAddOpens", MethodType.methodType(void.class, String.class));
+			for (Module module : modules) {
+				for (String name : module.getPackages()) {
+					try {
+						export.invokeExact(module, name);
+					} catch (Exception ex) {
+						throw new AssertionError(ex);
+					}
+				}
+			}
+		} catch (Throwable t) {
+			throw new IllegalStateException("Could not export packages", t);
 		}
 	}
 }

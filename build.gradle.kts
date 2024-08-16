@@ -11,7 +11,7 @@ repositories {
 }
 
 tasks.withType<JavaCompile>().configureEach {
-    sourceCompatibility = JavaVersion.VERSION_1_8.toString()
+    sourceCompatibility = JavaVersion.VERSION_1_9.toString()
     targetCompatibility = sourceCompatibility
 }
 val latestVersion = JavaLanguageVersion.of(22)
