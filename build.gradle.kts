@@ -1,5 +1,6 @@
 plugins {
     java
+    `maven-publish`
 }
 
 group = "dev.xdark"
@@ -15,8 +16,15 @@ tasks.withType<JavaCompile>().configureEach {
 }
 val latestVersion = JavaLanguageVersion.of(22)
 java.toolchain.languageVersion.set(latestVersion)
+java.withSourcesJar()
 tasks.withType<JavaExec>().configureEach {
     executable(javaToolchains.launcherFor {
         languageVersion.set(latestVersion)
     }.get().executablePath)
+}
+
+publishing {
+    publications.create<MavenPublication>("maven") {
+        from(components["java"])
+    }
 }
